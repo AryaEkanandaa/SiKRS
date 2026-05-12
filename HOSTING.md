@@ -11,7 +11,7 @@
 3. [Persiapan Sebelum Hosting](#3-persiapan-sebelum-hosting)
 4. [Hosting Database PostgreSQL (Supabase)](#4-hosting-database-postgresql-supabase)
 5. [Hosting Redis Cache (Upstash)](#5-hosting-redis-cache-upstash)
-6. [Hosting Backend (Render)](#6-hosting-backend-render)
+6. [Hosting Backend (Railway)](#6-hosting-backend-Railway)
 7. [Hosting Frontend (Vercel)](#7-hosting-frontend-vercel)
 8. [Konfigurasi CORS](#8-konfigurasi-cors)
 9. [Testing Setelah Hosting](#9-testing-setelah-hosting)
@@ -30,7 +30,7 @@
          v
   +------------------+        +-------------------+        +-------------------+
   |                  |  API   |                   |  SQL   |                   |
-  |   Vercel         |------->|   Render          |------->|   Supabase        |
+  |   Vercel         |------->|   Railway          |------->|   Supabase        |
   |   (Frontend)     |        |   (Backend API)   |        |   (PostgreSQL)    |
   |   React + Vite   |        |   Express + Prisma|        |   Cloud Database  |
   |                  |        |                   |        |                   |
@@ -50,7 +50,7 @@
 
 1. Pengguna membuka aplikasi melalui browser
 2. Browser memuat frontend dari **Vercel** (CDN global)
-3. Frontend mengirim permintaan data ke backend di **Render**
+3. Frontend mengirim permintaan data ke backend di **Railway**
 4. Backend membaca/menulis data ke database **Supabase PostgreSQL**
 5. Backend menyimpan cache ke **Upstash Redis** untuk mempercepat akses data
 6. Jika Redis tidak tersedia, backend otomatis menggunakan cache internal (in-memory)
@@ -63,7 +63,7 @@
 | Komponen | Teknologi | Platform Hosting |
 |----------|-----------|------------------|
 | **Frontend** | React 18 + Vite + Tailwind CSS | **Vercel** |
-| **Backend** | Express.js + Prisma ORM | **Render** |
+| **Backend** | Express.js + Prisma ORM | **Railway** |
 | **Database** | PostgreSQL | **Supabase** (atau Neon) |
 | **Caching** | Redis via ioredis | **Upstash Redis** (atau Redis Cloud) |
 | **Autentikasi** | JWT (jsonwebtoken) | Built-in di backend |
@@ -106,13 +106,13 @@ Kedua folder (`backend/` dan `frontend/`) sudah memiliki file `.env` sendiri. Fi
 | `JWT_SECRET` | Kunci rahasia JWT | `krs-system-jwt-secret-key-2026` | Bisa sama atau diganti |
 | `JWT_EXPIRES_IN` | Masa berlaku token | `7d` | `7d` |
 | `REDIS_URL` | URL koneksi Redis | `redis://localhost:6379` | Dari Upstash |
-| `PORT` | Port server | `5000` | Otomatis dari Render |
+| `PORT` | Port server | `5000` | Otomatis dari Railway |
 
 **Frontend** membaca:
 
 | Variable | Deskripsi | Contoh Lokal | Contoh Production |
 |----------|-----------|-------------|-------------------|
-| `VITE_API_URL` | URL Backend API | `http://localhost:5000/api` | `https://backend-api.onrender.com/api` |
+| `VITE_API_URL` | URL Backend API | `http://localhost:5000/api` | `https://backend-api.up.railway.app/api` |
 
 ### 3.3 Script Build dan Start
 
@@ -193,7 +193,7 @@ b. Klik **"New Query"**
 
 c. Copy seluruh isi file `backend/prisma/schema.prisma` dari project Anda. Tapi karena ini file Prisma (bukan SQL murni), kita perlu mendapatkan script SQL-nya.
 
-> **Alternatif tanpa terminal:** Gunakan fitur **Prisma Migrate** melalui dashboard Render nanti. Saat pertama kali deploy backend, kita akan menjalankan perintah `prisma db push` dari **Render Shell/Console** (dashboard web Render — tanpa terminal lokal).
+> **Alternatif tanpa terminal:** Gunakan fitur **Prisma Migrate** melalui dashboard Railway nanti. Saat pertama kali deploy backend, kita akan menjalankan perintah `prisma db push` dari **Railway Shell/Console** (dashboard web Railway — tanpa terminal lokal).
 
 Atau, Anda bisa menggunakan SQL Editor Supabase dengan menjalankan SQL berikut secara manual:
 
@@ -253,10 +253,10 @@ Ulangi langkah ini jika ada tabel lain yang perlu dibuat.
 
 Jika ingin memasukkan data awal (admin, dosen, mahasiswa), Anda bisa melakukannya melalui:
 
-a. **Render Console** (setelah backend ter-deploy): Jalankan perintah seed melalui dashboard Render
+a. **Railway Console** (setelah backend ter-deploy): Jalankan perintah seed melalui dashboard Railway
 b. **SQL Editor Supabase**: Insert data manual dengan query SQL
 
-Cara termudah: lakukan seeding setelah backend ter-deploy melalui menu **Shell** di dashboard Render.
+Cara termudah: lakukan seeding setelah backend ter-deploy melalui menu **Shell** di dashboard Railway.
 
 ---
 
@@ -295,7 +295,7 @@ rediss://default:YOUR_TOKEN@us1-robust-whale-12345.upstash.io:6379
 
 **4. Simpan sebagai environment variable**
 
-URL ini akan digunakan sebagai nilai `REDIS_URL` di environment variable backend pada Render nantinya.
+URL ini akan digunakan sebagai nilai `REDIS_URL` di environment variable backend pada Railway nantinya.
 
 ### Verifikasi Koneksi
 
@@ -305,88 +305,70 @@ Jika koneksi Redis gagal (misalnya URL salah), backend tidak akan crash — ia a
 
 ---
 
-## 6. Hosting Backend (Render)
+## 6. Hosting Backend (Railway)
 
-Render adalah platform PaaS untuk hosting aplikasi backend dengan mudah melalui dashboard web.
+Railway adalah platform PaaS untuk hosting aplikasi backend dengan mudah melalui dashboard web. Railway mendukung Node.js secara native dan terintegrasi langsung dengan GitHub.
 
 ### Langkah-langkah:
 
-**1. Buka Render dan Login**
+**1. Buka Railway dan Login**
 
-Buka [https://render.com](https://render.com). Klik **"Get Started"** atau **"Sign In"** menggunakan akun GitHub.
+Buka [https://railway.app](https://railway.app). Klik **"Start a New Project"** atau **"Login"** menggunakan akun GitHub.
 
-**2. Buat Web Service baru**
+**2. Buat Project Baru**
 
-- Setelah login, klik tombol **"New +"** di pojok kanan atas
-- Pilih **"Web Service"**
+- Setelah login, klik tombol **"New Project"** di dashboard
+- Pilih **"Deploy from GitHub repo"**
+- Pilih repository GitHub Anda (`SiKRS`)
+- Jika repository tidak muncul, klik **"Configure GitHub Apps"** dan beri akses ke repository SiKRS
 
-**3. Hubungkan ke GitHub**
+**3. Konfigurasi Service**
 
-- Pilih **"Connect repository"**
-- Pilih repository GitHub Anda yang berisi project `krs-system`
-- Jika repository tidak muncul, klik **"Configure GitHub Apps"** dan beri akses ke repository Anda
-
-**4. Konfigurasi Web Service**
-
-Isi form dengan detail berikut:
+Setelah repository terhubung, Railway akan otomatis mendeteksi project. Lakukan konfigurasi:
 
 | Field | Nilai |
 |-------|-------|
-| **Name** | `sikrs-backend` (atau nama lain) |
-| **Region** | Pilih yang terdekat (misal: Singapore) |
-| **Branch** | `main` (atau branch utama Anda) |
 | **Root Directory** | `backend` |
-| **Runtime** | `Node` |
-| **Build Command** | `npm install && npx prisma generate && npx prisma db push && npm run prisma:seed` |
+| **Build Command** | `npm install && npx prisma generate` |
 | **Start Command** | `node src/index.js` |
-| **Plan** | **Free** (cukup untuk development) |
+| **Plan** | **Free Trial** (cukup $5 credit gratis untuk development) |
 
 > **Penjelasan Build Command:**
-> - `npm install` — menginstall semua dependensi
-> - `npx prisma generate` — generate Prisma Client dari schema
-> - `npx prisma db push` — membuat tabel di database (sinkronisasi schema)
-> - `npm run prisma:seed` — memasukkan data awal (admin, dosen, prodi, mahasiswa)
+> - `npm install` — menginstall semua dependensi (Express, Prisma, ioredis, dll)
+> - `npx prisma generate` — generate Prisma Client dari file `schema.prisma`
+>
+> **Catatan:** `npx prisma db push` **tidak perlu** dimasukkan karena schema database sudah ter-push ke Supabase dari lokal.
 
-> **Perhatian:** Build command di atas akan menjalankan seed setiap kali deploy. Jika sudah pernah seed dan ingin mencegah duplikasi, hapus bagian `&& npm run prisma:seed` dari build command.
+**4. Set Environment Variable**
 
-**5. Set Environment Variable**
-
-Di halaman yang sama, scroll ke bagian **Environment Variables**. Tambahkan satu per satu:
+Di tab **Variables** atau **Settings** service, tambahkan environment variable berikut:
 
 | Key | Value |
 |-----|-------|
-| `DATABASE_URL` | `postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres` (isi sesuai Supabase) |
-| `JWT_SECRET` | `krs-system-jwt-secret-key-2026` (atau kunci rahasia Anda sendiri) |
+| `DATABASE_URL` | `postgresql://postgres.hinyfrizwtkgnzaphdjc:SiKRS2026%21%21@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require` |
+| `REDIS_URL` | `redis://default:e3piVOm4hrCRnfDhlEg9VysURqDuQqTw@redis-11893.crce302.ap-seast-1-3.ec2.cloud.redislabs.com:11893` |
+| `JWT_SECRET` | `sikrs-jwt-secret-key-2026` (atau kunci rahasia Anda sendiri) |
 | `JWT_EXPIRES_IN` | `7d` |
-| `REDIS_URL` | `rediss://default:[TOKEN]@[REGION].upstash.io:6379` (isi dari Upstash Redis) |
-| `PORT` | Biarkan kosong — Render akan mengatur port otomatis |
-| `NODE_VERSION` | `18` atau `20` (untuk memastikan versi Node.js yang digunakan) |
+| `PORT` | Biarkan kosong — Railway akan mengatur port otomatis |
 
-**6. Deploy**
+**5. Deploy**
 
-- Klik tombol **"Create Web Service"** di bagian bawah
-- Render akan mulai proses build dan deploy
-- Proses pertama biasanya memakan waktu 3-7 menit
+- Railway akan otomatis memulai proses build dan deploy setelah konfigurasi selesai
+- Proses pertama biasanya memakan waktu 2-5 menit
+- Pantau log di dashboard untuk melihat progress
 
-**7. Ambil URL Backend**
+**6. Ambil URL Backend**
 
 Setelah deploy selesai:
 
-- Di dashboard Render, Anda akan melihat URL seperti:
-  `https://sikrs-backend.onrender.com`
+- Di dashboard Railway, buka tab **Settings** → **Networking**
+- Railway akan memberikan URL seperti:
+  `https://sikrs-backend.up.railway.app`
 
-- Uji coba dengan membuka `https://sikrs-backend.onrender.com/api/health`
+- Uji coba dengan membuka `https://sikrs-backend.up.railway.app/api/health`
 - Jika muncul `{"status":"ok"}`, berarti backend sudah berjalan
 
-> **Catatan:** URL ini akan digunakan sebagai nilai `VITE_API_URL` di frontend nanti.
-
-**8. (Alternatif) Seed Data via Render Shell**
-
-Jika build command gagal karena seed (data sudah ada), Anda bisa menjalankan seed manual:
-
-- Di dashboard Render, buka menu **Shell** (console)
-- Ketik perintah: `npm run prisma:seed`
-- Tekan Enter
+> **Catatan:** URL ini akan digunakan sebagai nilai `VITE_API_URL` di frontend Vercel nanti.
 
 ---
 
@@ -424,7 +406,7 @@ Klik tombol **"Environment Variables"** dan tambahkan:
 
 | Key | Value |
 |-----|-------|
-| `VITE_API_URL` | `https://sikrs-backend.onrender.com/api` (URL backend dari Render, **jangan pakai http://localhost**) |
+| `VITE_API_URL` | `https://sikrs-backend.up.railway.app/api` (URL backend dari Railway, **jangan pakai http://localhost**) |
 
 > **PENTING!** Pastikan `VITE_API_URL` diisi dengan URL backend production, bukan localhost. Jika masih menggunakan `http://localhost:5000/api`, aplikasi tidak akan bisa terhubung ke backend.
 
@@ -469,7 +451,7 @@ app.use(cors({
 
 **Yang perlu diingat:**
 
-- Jika backend di `https://sikrs-backend.onrender.com`
+- Jika backend di `https://sikrs-backend.up.railway.app`
 - Dan frontend di `https://sikrs-frontend.vercel.app`
 - Maka CORS harus mengizinkan `https://sikrs-frontend.vercel.app`
 
@@ -483,7 +465,7 @@ Setelah semua komponen ter-deploy, lakukan pengujian berikut:
 
 ### 8.1 Cek Koneksi Backend
 
-Buka URL: `https://sikrs-backend.onrender.com/api/health`
+Buka URL: `https://sikrs-backend.up.railway.app/api/health`
 
 **Hasil yang diharapkan:**
 ```json
@@ -522,7 +504,7 @@ Buka URL frontend: `https://sikrs-frontend.vercel.app`
 **Gejala:** Backend error saat startup, muncul pesan "Can't reach database server"
 
 **Penyebab & Solusi:**
-- **Connection string salah** → Periksa kembali `DATABASE_URL` di environment variable Render
+- **Connection string salah** → Periksa kembali `DATABASE_URL` di environment variable Railway
 - **IP tidak diizinkan** → Di dashboard Supabase, buka **Database** → **Network Policies** dan pastikan **"Allow all incoming traffic"** aktif
 - **Password salah** → Reset password database di Supabase
 
@@ -532,7 +514,7 @@ Buka URL frontend: `https://sikrs-frontend.vercel.app`
 
 **Penyebab & Solusi:**
 - `VITE_API_URL` di Vercel masih mengarah ke `localhost`
-- Update `VITE_API_URL` ke URL backend production (`https://sikrs-backend.onrender.com/api`)
+- Update `VITE_API_URL` ke URL backend production (`https://sikrs-backend.up.railway.app/api`)
 - Redeploy frontend di Vercel
 
 ### 9.3 Environment Variable Salah
@@ -540,7 +522,7 @@ Buka URL frontend: `https://sikrs-frontend.vercel.app`
 **Gejala:** Aplikasi tidak berfungsi seperti yang diharapkan
 
 **Solusi:**
-- Periksa environment variable di dashboard Render dan Vercel
+- Periksa environment variable di dashboard Railway dan Vercel
 - Pastikan nama variable sesuai (case-sensitive)
 - Untuk Vite, variable harus diawali dengan `VITE_`
 - Setelah mengubah, redeploy aplikasi
@@ -551,7 +533,7 @@ Buka URL frontend: `https://sikrs-frontend.vercel.app`
 
 **Solusi:**
 - Periksa file `frontend/.env` jika masih ada file lokal
-- Di Vercel, pastikan `VITE_API_URL` sudah diisi dengan URL Render
+- Di Vercel, pastikan `VITE_API_URL` sudah diisi dengan URL Railway
 - Hapus cache browser atau buka di tab incognito
 
 ### 9.5 Build Frontend Gagal
@@ -567,7 +549,7 @@ Buka URL frontend: `https://sikrs-frontend.vercel.app`
 
 **Gejala:** Aplikasi lambat saat pertama kali dibuka setelah tidak digunakan
 
-**Penyebab:** Render free tier akan "tidur" setelah 15 menit tidak digunakan
+**Penyebab:** Railway free tier memiliki batasan resource
 
 **Solusi:**
 - Tunggu 30-60 detik, backend akan bangun dan merespon
@@ -579,8 +561,8 @@ Buka URL frontend: `https://sikrs-frontend.vercel.app`
 **Gejala:** Data tidak terbarui (stale) atau aplikasi berjalan lambat
 
 **Penyebab & Solusi:**
-- **REDIS_URL salah** → Periksa URL Redis di environment variable Render. Pastikan URL dari Upstash sudah benar
-- **Koneksi timeout** → Backend otomatis fallback ke in-memory cache, aplikasi tetap berjalan. Cek log backend di dashboard Render
+- **REDIS_URL salah** → Periksa URL Redis di environment variable Railway. Pastikan URL dari Upstash sudah benar
+- **Koneksi timeout** → Backend otomatis fallback ke in-memory cache, aplikasi tetap berjalan. Cek log backend di dashboard Railway
 - **Cache tidak terhapus** → Jika data diubah langsung di database, cache mungkin masih menyimpan data lama. Klik tombol **Refresh** di halaman admin untuk membersihkan cache
 - **Token Redis expired** → Di dashboard Upstash, periksa status database apakah masih aktif
 
@@ -602,7 +584,7 @@ Buka URL frontend: `https://sikrs-frontend.vercel.app`
 
 PaaS (Platform as a Service) adalah layanan cloud yang menyediakan platform untuk menjalankan aplikasi tanpa perlu mengurus infrastruktur server. Berikut alasan utama memilih PaaS untuk hosting aplikasi ini:
 
-| Aspek | PaaS (Vercel + Render + Supabase) | VPS / Server Manual |
+| Aspek | PaaS (Vercel + Railway + Supabase) | VPS / Server Manual |
 |-------|-----------------------------------|---------------------|
 | **Setup** | Langsung pakai, 5-10 menit | Butuh setup server, konfigurasi Nginx, SSL, dll (2-3 jam) |
 | **Pengetahuan Teknis** | Tidak perlu tahu Linux / terminal | Perlu paham Linux, SSH, command line |
@@ -617,7 +599,7 @@ PaaS (Platform as a Service) adalah layanan cloud yang menyediakan platform untu
 1. **Tidak perlu terminal** — Semua dikelola melalui dashboard web
 2. **Deploy otomatis** — Cukup hubungkan ke GitHub, setiap push akan otomatis di-deploy
 3. **SSL/HTTPS gratis** — Semua platform menyediakan SSL otomatis
-4. **Domain gratis** — Setiap platform memberikan subdomain gratis (`*.onrender.com`, `*.vercel.app`)
+4. **Domain gratis** — Setiap platform memberikan subdomain gratis (`*.up.railway.app`, `*.vercel.app`)
 5. **Dokumentasi lengkap** — Setiap platform memiliki panduan dan komunitas yang besar
 6. **Free tier** — Cocok untuk tugas kuliah dan prototyping
 
@@ -625,7 +607,7 @@ PaaS (Platform as a Service) adalah layanan cloud yang menyediakan platform untu
 
 | Platform | Kekurangan |
 |----------|-----------|
-| **Render (Free)** | Server tidur setelah 15 menit tidak digunakan. Aplikasi perlu ~30 detik untuk bangun |
+| **Railway (Free)** | Server tidur setelah 15 menit tidak digunakan. Aplikasi perlu ~30 detik untuk bangun |
 | **Supabase (Free)** | Database maksimal 500 MB. Project bisa di-pause jika tidak aktif |
 | **Vercel (Free)** | Build time terbatas (6000 menit/bulan). Bandwidth terbatas untuk team |
 
@@ -642,7 +624,7 @@ PaaS (Platform as a Service) adalah layanan cloud yang menyediakan platform untu
 
 | Platform | Kelebihan | Kekurangan |
 |----------|-----------|------------|
-| **Render** | Support Node.js, Prisma. Dashboard bagus | Free tier sleep |
+| **Railway** | Support Node.js, Prisma. Dashboard bagus | Free tier sleep |
 | **Railway** | Simple, support banyak bahasa | Free tier lebih terbatas |
 
 **Database:**
@@ -658,7 +640,7 @@ PaaS (Platform as a Service) adalah layanan cloud yang menyediakan platform untu
 | Komponen | Platform Terpilih | Alasan |
 |----------|-------------------|--------|
 | Frontend | **Vercel** | Integrasi terbaik dengan Vite/React. Build cepat. Gratis. |
-| Backend | **Render** | Support Node.js + Prisma. Build command kustom. Gratis. |
+| Backend | **Railway** | Support Node.js + Prisma. Build command kustom. Gratis. |
 | Database | **Supabase** | Dashboard UI lengkap. SQL Editor untuk import/migrasi. 500MB gratis. |
 
 ---
@@ -688,16 +670,16 @@ Gunakan checklist berikut untuk memastikan semua langkah hosting sudah selesai:
 - [ ] `REDIS_URL` sudah dicopy dari dashboard Upstash
 - [ ] URL Redis bisa diakses
 
-### Backend (Render)
+### Backend (Railway)
 
-- [ ] Akun Render sudah dibuat
+- [ ] Akun Railway sudah dibuat
 - [ ] Web Service sudah terhubung ke GitHub
 - [ ] Root directory diatur ke `backend`
 - [ ] Build command sudah diisi
 - [ ] Start command sudah diisi
 - [ ] Environment variable `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN` sudah diisi
 - [ ] Deploy berhasil (status "Live")
-- [ ] URL backend (`https://sikrs-backend.onrender.com`) sudah dicatat
+- [ ] URL backend (`https://sikrs-backend.up.railway.app`) sudah dicatat
 
 ### Frontend (Vercel)
 
@@ -711,7 +693,7 @@ Gunakan checklist berikut untuk memastikan semua langkah hosting sudah selesai:
 
 ### Testing
 
-- [ ] `https://sikrs-backend.onrender.com/api/health` mengembalikan `{"status":"ok"}`
+- [ ] `https://sikrs-backend.up.railway.app/api/health` mengembalikan `{"status":"ok"}`
 - [ ] `https://sikrs-frontend.vercel.app` bisa diakses
 - [ ] Login admin berhasil
 - [ ] Login mahasiswa berhasil
