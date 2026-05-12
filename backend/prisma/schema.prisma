@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id          String     @id @default(uuid())
+  email       String     @unique
+  password    String
+  role        Role       @default(USER)
+  dosenId     String?    @unique
+  dosen       Dosen?     @relation(fields: [dosenId], references: [id], onDelete: SetNull)
+  mahasiswaId String?    @unique
+  mahasiswa   Mahasiswa? @relation(fields: [mahasiswaId], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Dosen {
+  id         String      @id @default(uuid())
+  nama       String
+  nip        String      @unique
+  email      String?
+  noHp       String?
+  user       User?
+  mahasiswas Mahasiswa[] @relation("DosenPA")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model ProgramStudi {
+  id         String      @id @default(uuid())
+  nama       String      @unique
+  mahasiswas Mahasiswa[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Mahasiswa {
+  id        String        @id @default(uuid())
+  nama      String
+  nim       String        @unique
+  email     String?
+  noHp      String?
+  prodiId   String?
+  prodi     ProgramStudi? @relation(fields: [prodiId], references: [id], onDelete: SetNull)
+  dosenPAId String?
+  dosenPA   Dosen?        @relation("DosenPA", fields: [dosenPAId], references: [id], onDelete: SetNull)
+  user      User?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
