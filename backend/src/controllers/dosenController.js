@@ -167,3 +167,37 @@ exports.mahasiswa = asyncHandler(async (req, res) => {
 
   res.json({ mahasiswa });
 });
+
+exports.updateMe = asyncHandler(async (req, res) => {
+  if (!req.user.dosenId) {
+    return res.status(403).json({ message: "You are not linked to a dosen account" });
+  }
+
+  const { email, noHp } = req.body;
+
+  if (email !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: "Invalid email format" });
+  }
+  if (noHp !== undefined && noHp !== null && !/^\d{10,15}$/.test(noHp.replace(/\s/g, ""))) {
+    return res.status(400).json({ message: "No. HP must contain 10-15 digits" });
+  }
+
+  const data = {};
+  if (email !== undefined) data.email = email || null;
+  if (noHp !== undefined) data.noHp = noHp || null;
+
+  if (Object.keys(data).length === 0) {
+    return res.status(400).json({ message: "No fields to update" });
+  }
+
+  const dosen = await prisma.dosen.update({
+    where: { id: req.user.dosenId },
+    data,
+    include: { _count: { select: { mahasiswas: true } } },
+  });
+
+  await delCache("dosen:all");
+
+  res.json({ message: "Profile updated", dosen });
+});
+});

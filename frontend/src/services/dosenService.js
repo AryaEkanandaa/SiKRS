@@ -6,4 +6,5 @@ export const createDosen = (data) => api.post("/dosen", data);
 export const updateDosen = (id, data) => api.put(`/dosen/${id}`, data);
 export const deleteDosen = (id) => api.delete(`/dosen/${id}`);
 export const getMyDosenProfile = () => api.get("/dosen/me");
+export const updateMyDosenProfile = (data) => api.put("/dosen/me", data);
 export const getMyMahasiswaBimbingan = () => api.get("/dosen/me/mahasiswa");

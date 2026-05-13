@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { getMyDosenProfile, getMyMahasiswaBimbingan } from "../../services/dosenService";
-import { updateMyProfile } from "../../services/mahasiswaService";
+import { getMyDosenProfile, updateMyDosenProfile, getMyMahasiswaBimbingan } from "../../services/dosenService";
 import Modal from "../../components/Modal";
 
 function Skeleton({ className }) {
@@ -46,8 +45,8 @@ export default function DosenProfilePage() {
     if (!validate()) return;
     setSaving(true); setMessage(null);
     try {
-      const res = await updateMyProfile({ email: form.email || null, noHp: form.noHp || null });
-      setProfile(res.data.mahasiswa);
+      const res = await updateMyDosenProfile({ email: form.email || null, noHp: form.noHp || null });
+      setProfile(res.data.dosen);
       setMessage({ type: "success", text: "Profil berhasil diperbarui!" });
       setEditing(false);
     } catch (err) {

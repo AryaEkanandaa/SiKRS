@@ -6,6 +6,7 @@ const roleGuard = require("../middleware/roleGuard");
 
 router.get("/me/mahasiswa", auth, dosenController.mahasiswa);
 router.get("/me", auth, dosenController.me);
+router.put("/me", auth, dosenController.updateMe);
 
 router.get("/", auth, dosenController.index);
 router.get("/:id", auth, dosenController.show);
